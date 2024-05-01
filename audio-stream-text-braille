@@ -1,0 +1,65 @@
+import hid
+
+# Function to convert text to Braille
+def text_to_braille(text):
+    return "Braille: " + text
+
+# Function to send Braille data to the Braille reader device
+def send_braille_data(braille_data):
+    # Find the Braille reader device
+    device_info = hid.enumerate(0, 0)
+    braille_device = None
+    for info in device_info:
+        if info["product_string"] == "Braille Reader":
+            braille_device = hid.Device(path=info["path"])
+            break
+
+    # If Braille device found, send data
+    if braille_device:
+        # Convert Braille data to bytes (ASCII encoding)
+        braille_bytes = braille_data.encode('ascii')
+
+        # Send Braille data to the device
+        braille_device.write(braille_bytes)
+
+        print("Braille data sent successfully.")
+    else:
+        print("Braille device not found.")
+
+# Main function
+def main():
+    # Example input text
+    input_text = "Transcribe audio stream from one of multiple speakers using ASR to text"
+
+    # Convert text to Braille
+    braille_output = text_to_braille(input_text)
+    print(braille_output)
+
+    # Send Braille data to the Braille reader device
+    send_braille_data(braille_output)
+
+# Entry point of the program
+if __name__ == "__main__":
+    main()
+
+'''
+Transcribe audio stream from one of multiple speakers using ASR to text
+Speech recognition converts spoken words into text format
+Conduct normalization, tokenization and removal of punctuations so transcribed text is clean and ready for braille
+Create a rule based model and map each character of pre-processed text to its corresponding braille representation
+Now train models on a dataset that contains text-to-braille mapping. Since we are mapping text to braille, there is no pre-trained model available. We will need to train our own model for conversion
+PyBraille in-built capability handles compatibility with Braille reader peripherals. 
+Convert_text_to_braille
+Braille encoded text
+Format Braille output - length, spacing, alignments and any other formatting needed
+Encode Braille output - Grade 1 and Grade 2. Grade 2 is complex. The grid is 2x3. Line spacing, line length, any character complexity, letters, numbers
+Page numbers, headers 
+Formatting tags to indicate headings, lists, emphasis, paragraphs
+Output will be encoded text that is ready to display. Need to add accuracy validations or error handling et al
+Use of USB HID library for establishing communication with specific Braille reader device
+Then establish communication using HID et al 
+Then send braille data to braille_output. You can expand code based on specifications of the peripherals
+Evaluate model’s performance for accuracy and generalization
+Some UI allowing customer to initiate the text-to-Braille conversion process and monitor the status of the conversion
+Todo = need to iron out international language aspect (liblouis) is better than pybraille, it supports international, had advanced capabilities. Both are open-source
+'''
