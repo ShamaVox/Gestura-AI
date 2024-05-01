@@ -1,0 +1,20 @@
+"
+
+python
+"
+
+
+
+''''
+
+Pre-processing - extract audio and audio from video.
+Use facial recognition to detect speaker’s face and assign unique identifier and track them thru-out or use voice recognition technique to identify speaker based on a) voice characteristics b) pitch tone speech patterns c) train speaker recognition model or known voices available
+If multiple speakers are involved - segment the audio stream into speaker turns using speaker diarization technique
+When extracting audio and audio from video - extract indicators like pitch, intensity, speech rate, facial expression, body language
+Train the model to classify emotional states based on these extracted identifiers. Data labeling, training where emotions are annotated - like a specific segment. 
+Apply this model to classify the overall emotional state of each speaker during their turn or segmentaziation.
+Now comes integration - speaker with this emotional state
+Then comes continuous analysis where you can aggregate data and find trends | patterns for a given speaker’s emotional expressions, moments or shift’s thru video and audio
+Validation and verification follows now / iterating over models to follow for accuracy and reliability
+
+'''
