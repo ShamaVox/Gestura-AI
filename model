@@ -1,0 +1,24 @@
+```python
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+
+def create_model():
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 3)))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(10, activation='softmax'))  # Assuming 10 gesture classes
+    
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+
+# Assuming X_train and y_train are prepared datasets
+model = create_model()
+model.fit(X_train, y_train, epochs=10, validation_split=0.2)
+model.save('gesture_recognition_model.h5')
+```
