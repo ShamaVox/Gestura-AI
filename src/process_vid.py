@@ -2,6 +2,92 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import json
+from scipy.spatial.transform import Rotation as R
+
+def numpy_to_list(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: numpy_to_list(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [numpy_to_list(item) for item in obj]
+    return obj
+
+def calculate_distance(point1, point2):
+    return np.linalg.norm(np.array(point1) - np.array(point2))
+
+def add_t_pose(animation_data):
+    # Get the first frame's data
+    first_frame = animation_data["keyframes"][0]["landmarks"]["pose"]
+    
+    # Calculate lengths and distances
+    shoulder_width = calculate_distance(first_frame['left_shoulder'], first_frame['right_shoulder'])
+    upper_arm_length = calculate_distance(first_frame['left_shoulder'], first_frame['left_elbow'])
+    forearm_length = calculate_distance(first_frame['left_elbow'], first_frame['left_wrist'])
+    torso_length = calculate_distance(first_frame['left_shoulder'], first_frame['left_hip'])
+    hip_width = calculate_distance(first_frame['left_hip'], first_frame['right_hip'])
+    
+    # Create T-pose using the head position as anchor
+    head_pos = np.array(first_frame['head'])
+    t_pose = {
+        'head': head_pos.tolist(),
+        'left_shoulder': (head_pos + [-shoulder_width/2, 0, -torso_length/4]).tolist(),
+        'right_shoulder': (head_pos + [shoulder_width/2, 0, -torso_length/4]).tolist(),
+        'left_elbow': (head_pos + [-shoulder_width/2 - upper_arm_length, 0, -torso_length/4]).tolist(),
+        'right_elbow': (head_pos + [shoulder_width/2 + upper_arm_length, 0, -torso_length/4]).tolist(),
+        'left_wrist': (head_pos + [-shoulder_width/2 - upper_arm_length - forearm_length, 0, -torso_length/4]).tolist(),
+        'right_wrist': (head_pos + [shoulder_width/2 + upper_arm_length + forearm_length, 0, -torso_length/4]).tolist(),
+        'left_hip': (head_pos + [-hip_width/2, 0, -torso_length]).tolist(),
+        'right_hip': (head_pos + [hip_width/2, 0, -torso_length]).tolist()
+    }
+    
+    t_pose_frame = {
+        "frame": 0,
+        "landmarks": {"pose": t_pose}
+    }
+    
+    # Insert T-pose as the first frame
+    animation_data["keyframes"].insert(0, t_pose_frame)
+    
+    # Adjust frame numbers for subsequent keyframes
+    for i in range(1, len(animation_data["keyframes"])):
+        animation_data["keyframes"][i]["frame"] += 1
+    
+    return animation_data
+
+def calculate_rotation(parent, child, initial_direction):
+    direction = np.array(child) - np.array(parent)
+    rotation = R.align_vectors([direction], [initial_direction])[0]
+    return rotation.as_euler('XYZ', degrees=True)
+
+def calculate_rotations(frame_data):
+    rotations = {}
+    
+    # Define initial directions (in T-pose)
+    initial_directions = {
+        'Head': [0, 0, 1],
+        'Shoulder.L': [-1, 0, 0],
+        'Shoulder.R': [1, 0, 0],
+        'Elbow.L': [-1, 0, 0],
+        'Elbow.R': [1, 0, 0],
+        'Wrist.L': [-1, 0, 0],
+        'Wrist.R': [1, 0, 0],
+        'Hip.L': [0, 0, -1],
+        'Hip.R': [0, 0, -1]
+    }
+    
+    # Calculate rotations for each bone
+    rotations['Head'] = calculate_rotation(frame_data['left_shoulder'], frame_data['head'], initial_directions['Head'])
+    rotations['Shoulder.L'] = calculate_rotation(frame_data['left_shoulder'], frame_data['left_elbow'], initial_directions['Shoulder.L'])
+    rotations['Shoulder.R'] = calculate_rotation(frame_data['right_shoulder'], frame_data['right_elbow'], initial_directions['Shoulder.R'])
+    rotations['Elbow.L'] = calculate_rotation(frame_data['left_elbow'], frame_data['left_wrist'], initial_directions['Elbow.L'])
+    rotations['Elbow.R'] = calculate_rotation(frame_data['right_elbow'], frame_data['right_wrist'], initial_directions['Elbow.R'])
+    
+    # For hips, we'll use the direction from the opposite shoulder to the hip
+    rotations['Hip.L'] = calculate_rotation(frame_data['right_shoulder'], frame_data['left_hip'], initial_directions['Hip.L'])
+    rotations['Hip.R'] = calculate_rotation(frame_data['left_shoulder'], frame_data['right_hip'], initial_directions['Hip.R'])
+    
+    return rotations
 
 def normalize_coordinates(animation_data):
     all_coords_list = []
@@ -10,23 +96,17 @@ def normalize_coordinates(animation_data):
             all_coords_list.append(coords)
 
     all_coords = np.array(all_coords_list)    
-    max_x = np.max(all_coords[:, 0])
-    min_x = np.min(all_coords[:, 0])
-    max_y = np.max(all_coords[:, 1])
-    min_y = np.min(all_coords[:, 1])
-    max_z = np.max(all_coords[:, 2])
-    min_z = np.min(all_coords[:, 2])
+    max_coords = np.max(all_coords, axis=0)
+    min_coords = np.min(all_coords, axis=0)
     
-    max_coords = [max_x, max_y, max_z]
-    min_coords = [min_x, min_y, min_z]
-    
-    # Normalize to range [0, 1]
+    # Normalize to range [-1, 1] and convert to Blender coordinate system
     normalized_data = animation_data.copy()
     for frame in normalized_data['keyframes']:
         for landmark, coords in frame['landmarks']['pose'].items():
             normalized_coords = [
-                (coords[i] - min_coords[i]) / (max_coords[i] - min_coords[i])
-                for i in range(3)  # For x, y, z
+                2 * (coords[0] - min_coords[0]) / (max_coords[0] - min_coords[0]) - 1,  # X (left/right)
+                2 * (coords[2] - min_coords[2]) / (max_coords[2] - min_coords[2]) - 1,  # Y (front/back)
+                2 * (coords[1] - min_coords[1]) / (max_coords[1] - min_coords[1]) - 1   # Z (top/bottom)
             ]
             frame['landmarks']['pose'][landmark] = normalized_coords
     
@@ -86,6 +166,7 @@ def process_video(video_path, num_frames=80):
         "keyframes": []
     }
     
+    
     mp_holistic = mp.solutions.holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5)
     
     all_coords = {'x': [], 'y': [], 'z': []}
@@ -111,9 +192,14 @@ def process_video(video_path, num_frames=80):
         })
 
     cap.release()
-    
+
     # Normalize the coordinates
     normalized_animation_data = normalize_coordinates(animation_data)
+
+    normalized_animation_data = add_t_pose(normalized_animation_data)
+
+    for frame in normalized_animation_data['keyframes']:
+        frame['rotations'] = calculate_rotations(frame['landmarks']['pose'])
     
     # Calculate bounds of normalized data
     all_coords = np.array([
@@ -130,8 +216,9 @@ def process_video(video_path, num_frames=80):
     return normalized_animation_data
 
 def save_animation_data(animation_data, output_file):
+    serializable_data = numpy_to_list(animation_data)
     with open(output_file, 'w') as f:
-        json.dump(animation_data, f, indent=2)
+        json.dump(serializable_data, f, indent=2)
 
 if __name__ == '__main__':
     video_path = 'WLASL/start_kit/raw_videos/05727.mp4'

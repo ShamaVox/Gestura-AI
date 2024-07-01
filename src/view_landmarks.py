@@ -94,7 +94,28 @@ class LandmarkVisualizerApp(QMainWindow):
                 if start in pose_data and end in pose_data:
                     self.ax.plot(*zip(pose_data[start], pose_data[end]), c='cyan')
 
-        # Set axis limits and labels (unchanged)
+        # Set axis limits
+        self.ax.set_xlim(-1, 1)
+        self.ax.set_ylim(-1, 1)
+        self.ax.set_zlim(-1, 1)
+
+        # Set labels
+        self.ax.set_xlabel('X (Left/Right)')
+        self.ax.set_ylabel('Y (Front/Back)')
+        self.ax.set_zlabel('Z (Top/Bottom)')
+
+        # Add coordinate system arrows
+        arrow_length = 0.2
+        self.ax.quiver(0, 0, 0, arrow_length, 0, 0, color='r', arrow_length_ratio=0.1)
+        self.ax.quiver(0, 0, 0, 0, arrow_length, 0, color='g', arrow_length_ratio=0.1)
+        self.ax.quiver(0, 0, 0, 0, 0, arrow_length, color='b', arrow_length_ratio=0.1)
+
+        # Add text labels for axes
+        self.ax.text(arrow_length, 0, 0, "X", color='r')
+        self.ax.text(0, arrow_length, 0, "Y", color='g')
+        self.ax.text(0, 0, arrow_length, "Z", color='b')
+
+        self.ax.set_title('3D Landmarks (Blender Coordinate System)')
 
     def add_text_label(self, point, label):
         self.ax.text(*point, label, fontsize=8, ha='right', va='bottom')
