@@ -122,7 +122,7 @@ class LandmarkVisualizerApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    video_path = 'WLASL/start_kit/raw_videos/05727.mp4'
+    video_path = 'videos/maybe_1.mp4'
     animation_data_path = 'animation_data.json'
     with open(animation_data_path, 'r') as f:
         animation_data = json.load(f)

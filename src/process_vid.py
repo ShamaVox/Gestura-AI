@@ -221,6 +221,6 @@ def save_animation_data(animation_data, output_file):
         json.dump(serializable_data, f, indent=2)
 
 if __name__ == '__main__':
-    video_path = 'WLASL/start_kit/raw_videos/05727.mp4'
+    video_path = 'videos/maybe_1.mp4'
     animation_data = process_video(video_path, num_frames=80)
     save_animation_data(animation_data, 'animation_data.json')
