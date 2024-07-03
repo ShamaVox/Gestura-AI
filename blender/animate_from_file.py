@@ -1,82 +1,125 @@
 import bpy
 import json
-import mathutils
+import math
+from mathutils import Vector, Quaternion, Euler
 
-def interpolate_bone(parent_pos, child_pos, factor):
-    return parent_pos.lerp(child_pos, factor)
+def load_animation_data(file_path):
+    with open(file_path, 'r') as f:
+        return json.load(f)
 
-# Load the animation data
-with open('/Users/admin/repos/conferease/animation_data.json', 'r') as f:
-    animation_data = json.load(f)
+def get_bone_vector(pose_bones, bone_name):
+    bone = pose_bones[bone_name]
+    return bone.tail - bone.head
 
-# Get the armature
-armature = bpy.data.objects['Armature']  # Adjust name if different
+def calculate_rotation(vector1, vector2):
+    return vector1.rotation_difference(vector2)
 
-# Define bone mapping and hierarchy
-bone_mapping = {
-    'head': 'Head',
-    'left_shoulder': 'LeftShoulder',
-    'right_shoulder': 'RightShoulder',
-    'left_elbow': 'LeftArm',
-    'right_elbow': 'RightArm',
-    'left_wrist': 'LeftForeArm',
-    'right_wrist': 'RightForeArm',
-    'left_hip': 'LeftUpLeg',
-    'right_hip': 'RightUpLeg'
-}
+LEFT_ARM_OFFSET = Euler((math.radians(0), math.radians(0), math.radians(0)), 'XYZ')
+RIGHT_ARM_OFFSET = Euler((math.radians(0), math.radians(0), math.radians(0)), 'XYZ')
+LEFT_FOREARM_OFFSET = Euler((math.radians(0), math.radians(0), math.radians(0)), 'XYZ')
+RIGHT_FOREARM_OFFSET = Euler((math.radians(0), math.radians(0), math.radians(0)), 'XYZ')
 
-bone_hierarchy = {
-    'Hips': ['Spine', 'Spine1', 'Spine2', 'Neck', 'Head'],
-    'LeftShoulder': ['LeftArm', 'LeftForeArm', 'LeftHand'],
-    'RightShoulder': ['RightArm', 'RightForeArm', 'RightHand'],
-    'LeftUpLeg': ['LeftLeg', 'LeftFoot'],
-    'RightUpLeg': ['RightLeg', 'RightFoot']
-}
+def apply_rotation(bone, rotation, frame, is_arm=False, side='left'):
+    if is_arm and side == 'left':
+        # Apply additional rotation for arm bones
+        correction = LEFT_ARM_OFFSET
+        correction_quat = correction.to_quaternion()
+        rotation = rotation @ correction_quat
+    elif side == 'left' and not is_arm:
+        correction = LEFT_FOREARM_OFFSET
+        correction_quat = correction.to_quaternion()
+        rotation = rotation @ correction_quat
+    elif side == 'right' and is_arm:
+        correction = RIGHT_ARM_OFFSET
+        correction_quat = correction.to_quaternion()
+        rotation = rotation @ correction_quat
+    elif side == 'right' and not is_arm:
+        correction = RIGHT_FOREARM_OFFSET
+        correction_quat = correction.to_quaternion()
+        rotation = rotation @ correction_quat
 
-# Set animation parameters
-bpy.context.scene.frame_start = 0
-bpy.context.scene.frame_end = len(animation_data['keyframes']) - 1
+    if bone.rotation_mode == 'QUATERNION':
+        bone.rotation_quaternion = rotation
+        bone.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+    else:
+        euler = rotation.to_euler(bone.rotation_mode)
+        bone.rotation_euler = euler
+        bone.keyframe_insert(data_path="rotation_euler", frame=frame)
 
-# Animate the avatar
-for frame, keyframe in enumerate(animation_data['keyframes']):
-    bpy.context.scene.frame_set(frame)
+def calculate_arm_rotation(shoulder, elbow, reference_vector):
+    arm_vector = Vector(elbow) - Vector(shoulder)
+    return calculate_rotation(reference_vector, arm_vector)
+
+def animate_rig(armature, animation_data):
+    pose_bones = armature.pose.bones
     
-    pose_data = keyframe['landmarks']['pose']
+    bone_mapping = {
+        'left_shoulder': 'mixamorig2:LeftArm',
+        'right_shoulder': 'mixamorig2:RightArm',
+        'left_elbow': 'mixamorig2:LeftForeArm',
+        'right_elbow': 'mixamorig2:RightForeArm',
+    }
     
-    # Set positions for tracked bones
-    for landmark, bone_name in bone_mapping.items():
-        if landmark in pose_data:
-            bone = armature.pose.bones[bone_name]
-            coords = pose_data[landmark]
-            bone.location = (coords[0], coords[2], coords[1])
-            bone.keyframe_insert(data_path="location", frame=frame)
+    # Calculate reference vectors (T-pose)
+    reference_vectors = {
+        'mixamorig2:LeftArm': get_bone_vector(pose_bones, 'mixamorig2:LeftArm'),
+        'mixamorig2:RightArm': get_bone_vector(pose_bones, 'mixamorig2:RightArm'),
+        'mixamorig2:LeftForeArm': get_bone_vector(pose_bones, 'mixamorig2:LeftForeArm'),
+        'mixamorig2:RightForeArm': get_bone_vector(pose_bones, 'mixamorig2:RightForeArm'),
+    }
     
-    # Interpolate spine bones
-    if 'left_hip' in pose_data and 'right_hip' in pose_data and 'head' in pose_data:
-        hips_pos = (mathutils.Vector(pose_data['left_hip']) + mathutils.Vector(pose_data['right_hip'])) / 2
-        head_pos = mathutils.Vector(pose_data['head'])
-        spine_bones = bone_hierarchy['Hips']
-        for i, bone_name in enumerate(spine_bones):
-            factor = (i + 1) / (len(spine_bones) + 1)
-            bone = armature.pose.bones[bone_name]
-            bone.location = interpolate_bone(hips_pos, head_pos, factor)
-            bone.keyframe_insert(data_path="location", frame=frame)
+    # Calculate initial rotations (from T-pose to first frame)
+    first_frame = animation_data['keyframes'][1]['landmarks']['pose']  # Using second frame as first actual pose
+    initial_rotations = {
+        'mixamorig2:LeftArm': calculate_arm_rotation(first_frame['left_shoulder'], first_frame['left_elbow'], reference_vectors['mixamorig2:LeftArm']),
+        'mixamorig2:RightArm': calculate_arm_rotation(first_frame['right_shoulder'], first_frame['right_elbow'], reference_vectors['mixamorig2:RightArm']),
+        'mixamorig2:LeftForeArm': calculate_arm_rotation(first_frame['left_elbow'], first_frame['left_wrist'], reference_vectors['mixamorig2:LeftForeArm']),
+        'mixamorig2:RightForeArm': calculate_arm_rotation(first_frame['right_elbow'], first_frame['right_wrist'], reference_vectors['mixamorig2:RightForeArm']),
+    }
     
-    # Interpolate arm and leg bones
-    for parent, children in bone_hierarchy.items():
-        if parent in bone_mapping.values():
-            parent_bone = armature.pose.bones[parent]
-            parent_pos = parent_bone.head
-            end_pos = parent_bone.tail
-            for i, child_name in enumerate(children):
-                factor = (i + 1) / (len(children) + 1)
-                child_bone = armature.pose.bones[child_name]
-                child_bone.location = interpolate_bone(parent_pos, end_pos, factor)
-                child_bone.keyframe_insert(data_path="location", frame=frame)
+    # Set up animation
+    bpy.context.scene.frame_start = 0
+    bpy.context.scene.frame_end = len(animation_data['keyframes']) - 1
+    
+    # Animate each frame
+    for frame_data in animation_data['keyframes'][1:]:  # Skip the first frame (T-pose)
+        frame_number = frame_data['frame']
+        landmarks = frame_data['landmarks']['pose']
+        
+        # Animate upper arms and forearms
+        for side in ['left', 'right']:
+            shoulder_bone = bone_mapping[f'{side}_shoulder']
+            elbow_bone = bone_mapping[f'{side}_elbow']
+            
+            arm_rot = calculate_arm_rotation(
+                landmarks[f'{side}_shoulder'], 
+                landmarks[f'{side}_elbow'], 
+                reference_vectors[shoulder_bone]
+            )
+            final_rot = initial_rotations[shoulder_bone].inverted() @ arm_rot
+            apply_rotation(pose_bones[shoulder_bone], final_rot, frame_number, is_arm=True, side=side)
+            
+            forearm_rot = calculate_arm_rotation(
+                landmarks[f'{side}_elbow'], 
+                landmarks[f'{side}_wrist'], 
+                reference_vectors[elbow_bone]
+            )
+            final_rot = initial_rotations[elbow_bone].inverted() @ forearm_rot
+            apply_rotation(pose_bones[elbow_bone], final_rot, frame_number, is_arm=False, side=side)
+    
+    # Set interpolation method for smooth animation
+    for fcurve in armature.animation_data.action.fcurves:
+        for kf in fcurve.keyframe_points:
+            kf.interpolation = 'LINEAR'
 
-# Set interpolation method for smooth animation
-for fc in armature.animation_data.action.fcurves:
-    for kf in fc.keyframe_points:
-        kf.interpolation = 'LINEAR'
 
-print("Animation complete!")
+def main():
+    animation_data = load_animation_data('/Users/admin/repos/conferease/animation_data.json')
+    armature = bpy.data.objects['Armature.001']
+    bpy.context.view_layer.objects.active = armature
+    bpy.ops.object.mode_set(mode='POSE')
+    animate_rig(armature, animation_data)
+    bpy.context.view_layer.update()
+
+if __name__ == "__main__":
+    main()
