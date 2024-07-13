@@ -1317,7 +1317,7 @@ MonoBehaviour:
   updatePrompt: 1
   dropOldBuffer: 0
   useVad: 0
-  tokensTimestamps: 1
+  tokensTimestamps: 0
   speedUp: 0
   audioCtx: 0
 --- !u!4 &1143185258

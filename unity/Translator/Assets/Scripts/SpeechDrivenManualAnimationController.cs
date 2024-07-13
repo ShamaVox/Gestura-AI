@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-
 public class SpeechDrivenManualAnimationController : MonoBehaviour
 {
     public WhisperManager whisper;
@@ -23,6 +22,8 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
     private WhisperStream _stream;
 
     public AutoAnimationController autoAnimationController;
+
+    private HashSet<string> processedWords = new HashSet<string>();
 
     private async void Start()
     {
@@ -43,6 +44,7 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
         {
             _stream.StartStream();
             microphoneRecord.StartRecord();
+            processedWords.Clear(); // Clear processed words when starting a new recording
         }
         else
             microphoneRecord.StopRecord();
@@ -61,23 +63,43 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
         result = Regex.Replace(result, @"\[BLANK_AUDIO\]", "");
         result = Regex.Replace(result, @"\[INAUDIBLE\]", "");
         transcriptionText.text = result;
-        // UiUtils.ScrollDown(scroll);
     }
     
     private void OnSegmentFinished(WhisperResult segment)
     {
-        Debug.Log($"Segment finished: {segment.Result}");
-        autoAnimationController.ProcessText(segment.Result);
+        var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+        Debug.Log($"{time} - Segment finished: {segment.Result}");
+        processedWords.Clear(); // Clear processed words when stream finishes
+        // We don't need to process text here anymore as it's done in OnSegmentUpdated
     }
 
     private void OnSegmentUpdated(WhisperResult segment)
     {
-        Debug.Log($"Segment updated: {segment.Result}");
-        // autoAnimationController.ProcessText(segment.Result);
+        var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+        Debug.Log($"{time} - Segment updated: {segment.Result}");
+        
+        // Process the updated segment
+        string[] words = segment.Result.Split(new char[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (string word in words)
+        {
+            string lowercaseWord = word.ToLower();
+            if (!processedWords.Contains(lowercaseWord))
+            {
+                processedWords.Add(lowercaseWord);
+                if (autoAnimationController.textToAnimationMap.ContainsKey(lowercaseWord))
+                {
+                    foreach (string animation in autoAnimationController.textToAnimationMap[lowercaseWord])
+                    {
+                        autoAnimationController.QueueAnimation(animation);
+                    }
+                }
+            }
+        }
     }
     
     private void OnFinished(string finalResult)
     {
         Debug.Log("Stream finished!");
+        processedWords.Clear(); // Clear processed words when stream finishes
     }
 }

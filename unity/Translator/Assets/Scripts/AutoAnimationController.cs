@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
+// using System.Regex;
+using System;
 
 public class AutoAnimationController : MonoBehaviour
 {
@@ -11,7 +15,7 @@ public class AutoAnimationController : MonoBehaviour
     private Queue<string> animationQueue = new Queue<string>();
     private bool isPlayingAnimation = false;
 
-    private Dictionary<string, List<string>> textToAnimationMap = new Dictionary<string, List<string>>
+    public Dictionary<string, List<string>> textToAnimationMap = new Dictionary<string, List<string>>
     {
         {"hello", new List<string>{"Hello"}},
         {"hi", new List<string>{"Hello"}},
@@ -44,37 +48,51 @@ public class AutoAnimationController : MonoBehaviour
         {"six", new List<string>{"Six"}},
         {"6", new List<string>{"Six"}}
     };
+    
 
     public void ProcessText(string text)
     {
+        var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+        Debug.Log($"{time} - Processing text: {text}");
         // Convert to lowercase and remove all punctuation
         text = Regex.Replace(text.ToLower(), @"[^\w\s]", "");
 
-        List<(int index, string phrase, List<string> animations)> detectedPhrases = new List<(int, string, List<string>)>();
+        var detectedPhrases = new List<(int index, string phrase, List<string> animations)>();
 
         foreach (var entry in textToAnimationMap)
         {
-            string pattern = @"\b" + Regex.Escape(entry.Key) + @"\b";
-            foreach (Match match in Regex.Matches(text, pattern))
+            var index = text.IndexOf(entry.Key, StringComparison.Ordinal);
+            if (index != -1)
             {
-                detectedPhrases.Add((match.Index, entry.Key, entry.Value));
+                detectedPhrases.Add((index, entry.Key, entry.Value));
             }
         }
+        
+        time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+        Debug.Log($"{time} - Detected phrases: {string.Join(", ", detectedPhrases.Select(p => p.phrase))}");
 
-        // Sort detected phrases by their position in the text
-        detectedPhrases.Sort((a, b) => a.index.CompareTo(b.index));
+        if (detectedPhrases.Count == 0) return; // Early exit if no phrases are detected
 
-        foreach (var detected in detectedPhrases)
+        detectedPhrases.Sort((a, b) => a.index.CompareTo(b.index)); // Sort by index
+
+        foreach (var phrase in detectedPhrases)
         {
-            foreach (string animationName in detected.animations)
-            {
-                QueueAnimation(animationName);
-            }
+
+            animationQueue.Enqueue(phrase.animations[0]); // Enqueue only the first animation for simplicity
+        }
+
+        if (!isPlayingAnimation)
+        {
+            time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+            Debug.Log($"{time} - Starting animations: {string.Join(", ", detectedPhrases.Select(p => p.animations[0]))}");
+            StartCoroutine(PlayQueuedAnimations());
         }
     }
 
-    private void QueueAnimation(string animationName)
+    public void QueueAnimation(string animationName)
     {
+        var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+        Debug.Log($"{time} - Queuing animation: {animationName}");
         animationQueue.Enqueue(animationName);
         
         if (!isPlayingAnimation)
@@ -89,14 +107,17 @@ public class AutoAnimationController : MonoBehaviour
 
         while (animationQueue.Count > 0)
         {
-            Debug.Log("Playing animation: " + animationQueue.Peek());
+            var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+            Debug.Log($"{time} - Playing queued animation: {animationQueue.Peek()}");
             string animationName = animationQueue.Dequeue();
             animator.Play(animationName);
 
             // Wait for the animation to finish
             yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-            yield return new WaitForSeconds(0.01f); // Small buffer between animations
-            Debug.Log("Animation finished: " + animationName);
+            // yield return new WaitForSeconds(0.01f); // Small buffer between animations
+            time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+            Debug.Log($"{time} - Finished playing queued animation: {animationName}");
+            Debug.Log("Remaining animations: " + string.Join(", ", animationQueue));
         }
 
         isPlayingAnimation = false;
