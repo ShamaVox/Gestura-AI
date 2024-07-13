@@ -113,7 +113,7 @@ public class VideoAudioTranscriber : MonoBehaviour
     private void OnResult(string result)
     {
         text.text = result;
-        UiUtils.ScrollDown(scroll);
+        //UiUtils.ScrollDown(scroll);
     }
 
     private void OnSegmentUpdated(WhisperResult segment)

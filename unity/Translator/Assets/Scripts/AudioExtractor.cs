@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Video;
+using System.Collections;
 
 public class AudioExtractor : MonoBehaviour
 {
@@ -26,8 +27,16 @@ public class AudioExtractor : MonoBehaviour
         videoBackground.GetComponent<Renderer>().material = videoMaterial;
 
         // Play the video (this will also play the audio through the AudioSource)
-        videoPlayer.Play();
+        StartCoroutine(WaitAndPlayVideo());
+    }
 
+    IEnumerator WaitAndPlayVideo()
+    {
+        // Wait for 3 seconds
+        yield return new WaitForSeconds(3);
+
+        // Play the video (this will also play the audio through the AudioSource)
+        videoPlayer.Play();
         Debug.Log("Video started playing with audio output to AudioSource.");
     }
 

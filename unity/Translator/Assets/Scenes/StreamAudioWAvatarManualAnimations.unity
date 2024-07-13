@@ -412,8 +412,8 @@ RectTransform:
   m_Father: {fileID: 584657256}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -785,10 +785,10 @@ RectTransform:
   m_Father: {fileID: 584657256}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 170}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -80}
+  m_SizeDelta: {x: 0, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &687932846
 MonoBehaviour:
@@ -1045,7 +1045,6 @@ GameObject:
   m_Component:
   - component: {fileID: 876500353}
   - component: {fileID: 876500352}
-  - component: {fileID: 876500354}
   m_Layer: 0
   m_Name: Microphone
   m_TagString: Untagged
@@ -1080,7 +1079,7 @@ MonoBehaviour:
   vadStop: 0
   dropVadPart: 1
   vadStopTime: 2
-  microphoneDropdown: {fileID: 0}
+  microphoneDropdown: {fileID: 1490132572}
   microphoneDefaultLabel: Default microphone
 --- !u!4 &876500353
 Transform:
@@ -1097,24 +1096,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &876500354
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 876500351}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 017b38f8ef7994c5b8914ab18a547ec1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  whisper: {fileID: 1143185257}
-  microphoneRecord: {fileID: 876500352}
-  button: {fileID: 159108006}
-  buttonText: {fileID: 557118830}
-  text: {fileID: 1192294299}
-  scroll: {fileID: 687932844}
 --- !u!1 &921889526
 GameObject:
   m_ObjectHideFlags: 0
@@ -1236,7 +1217,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 219831963}
   m_HandleRect: {fileID: 219831962}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1289,7 +1270,7 @@ MonoBehaviour:
   initialPrompt: 
   stepSec: 0.5
   keepSec: 0.1
-  lengthSec: 3
+  lengthSec: 2
   updatePrompt: 0
   dropOldBuffer: 0
   useVad: 0
@@ -1351,10 +1332,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 12
+    m_FontSize: 18
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 1
+    m_MinSize: 0
     m_MaxSize: 40
     m_Alignment: 0
     m_AlignByGeometry: 0
@@ -1362,7 +1343,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: 'This is some text
+
+'
 --- !u!222 &1192294300
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1383,13 +1366,13 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2107073882}
-  m_RootOrder: 1
+  m_Father: {fileID: 1492941749}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 8.5, y: 25.889992}
-  m_SizeDelta: {x: 17, y: 30}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -34.350002, y: -30}
+  m_SizeDelta: {x: -72.3, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1216948164
 PrefabInstance:
@@ -1682,7 +1665,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1490132572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1760,9 +1743,9 @@ RectTransform:
   m_Father: {fileID: 584657256}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -337.55, y: -116.78}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 90, y: 70}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1490132574
@@ -1830,14 +1813,15 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1192294301}
   m_Father: {fileID: 2107073882}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 147}
-  m_SizeDelta: {x: 0, y: 300}
+  m_AnchoredPosition: {x: -0.0007800535, y: -0.00064069073}
+  m_SizeDelta: {x: -60.5186, y: 200}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1545485004
 GameObject:
@@ -2010,8 +1994,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1820565996}
   m_HandleRect: {fileID: 1820565994}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.51
+  m_Value: 1.0000107
+  m_Size: 0.715
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2152,7 +2136,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1576789909}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 1.1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2648,35 +2632,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2041774256}
-  - component: {fileID: 2041774255}
   - component: {fileID: 2041774257}
   m_Layer: 0
-  m_Name: DynamicAnimationController
+  m_Name: SpeechDrivenAnimationController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2041774255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2041774254}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 984f97ae9e7244a50ac521f1f1b034d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  whisper: {fileID: 1143185257}
-  microphoneRecord: {fileID: 876500352}
-  animator: {fileID: 0}
-  animationDropdown: {fileID: 1490132572}
-  recordButton: {fileID: 159108006}
-  buttonText: {fileID: 557118830}
-  transcriptionText: {fileID: 1192294299}
-  scroll: {fileID: 687932844}
 --- !u!4 &2041774256
 Transform:
   m_ObjectHideFlags: 0
@@ -2819,7 +2782,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1492941749}
-  - {fileID: 1192294301}
   m_Father: {fileID: 687932845}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2956,7 +2918,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4885642956067622036, guid: 11b3121e729db481fad4ddbc37742431, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 106.17
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4885642956067622036, guid: 11b3121e729db481fad4ddbc37742431, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

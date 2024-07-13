@@ -89,12 +89,14 @@ public class AutoAnimationController : MonoBehaviour
 
         while (animationQueue.Count > 0)
         {
+            Debug.Log("Playing animation: " + animationQueue.Peek());
             string animationName = animationQueue.Dequeue();
             animator.Play(animationName);
 
             // Wait for the animation to finish
             yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-            yield return new WaitForSeconds(0.1f); // Small buffer between animations
+            yield return new WaitForSeconds(0.01f); // Small buffer between animations
+            Debug.Log("Animation finished: " + animationName);
         }
 
         isPlayingAnimation = false;

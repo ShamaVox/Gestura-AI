@@ -30,7 +30,7 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
         _stream.OnResultUpdated += OnResult;
         _stream.OnSegmentFinished += OnSegmentFinished;
         _stream.OnStreamFinished += OnFinished;
-
+        _stream.OnSegmentUpdated += OnSegmentUpdated;
         microphoneRecord.OnRecordStop += OnRecordStop;
         recordButton.onClick.AddListener(OnRecordButtonPressed);
 
@@ -57,14 +57,23 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
 
     private void OnResult(string result)
     {
+        // Replace instances of [BLANK_AUDIO] and [INAUDIBLE] with a blank space
+        result = Regex.Replace(result, @"\[BLANK_AUDIO\]", "");
+        result = Regex.Replace(result, @"\[INAUDIBLE\]", "");
         transcriptionText.text = result;
-        UiUtils.ScrollDown(scroll);
+        // UiUtils.ScrollDown(scroll);
     }
     
     private void OnSegmentFinished(WhisperResult segment)
     {
         Debug.Log($"Segment finished: {segment.Result}");
         autoAnimationController.ProcessText(segment.Result);
+    }
+
+    private void OnSegmentUpdated(WhisperResult segment)
+    {
+        Debug.Log($"Segment updated: {segment.Result}");
+        // autoAnimationController.ProcessText(segment.Result);
     }
     
     private void OnFinished(string finalResult)
