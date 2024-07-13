@@ -1089,7 +1089,7 @@ VideoPlayer:
   m_TargetMaterialRenderer: {fileID: 0}
   m_TargetMaterialProperty: <noninit>
   m_RenderMode: 2
-  m_AspectRatio: 2
+  m_AspectRatio: 5
   m_DataSource: 0
   m_PlaybackSpeed: 1
   m_AudioOutputMode: 2
@@ -1707,25 +1707,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2eb63ed765c4b456bb85c26c019603fe, type: 3}
   m_PrefabInstance: {fileID: 163691490}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1617338008
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1617338005}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6de96c719f5a14351b75eb1b5676f3b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  whisper: {fileID: 1143185257}
-  microphoneRecord: {fileID: 0}
-  recordButton: {fileID: 159108006}
-  buttonText: {fileID: 557118830}
-  transcriptionText: {fileID: 1192294299}
-  scroll: {fileID: 687932844}
-  autoAnimationController: {fileID: 0}
 --- !u!95 &1617338009 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 2eb63ed765c4b456bb85c26c019603fe, type: 3}
@@ -1744,25 +1725,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 1617338009}
---- !u!114 &1617338012
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1617338005}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7df7e58e97a7e499a8ea57ff8bf24a73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  whisper: {fileID: 1143185257}
-  microphoneRecord: {fileID: 0}
-  animationController: {fileID: 1617338011}
-  recordButton: {fileID: 159108006}
-  buttonText: {fileID: 557118830}
-  transcriptionText: {fileID: 1192294299}
-  scroll: {fileID: 687932844}
 --- !u!1 &1820565993
 GameObject:
   m_ObjectHideFlags: 0
