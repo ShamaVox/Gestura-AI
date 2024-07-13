@@ -1386,9 +1386,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'This is text
-
-'
+  m_Text: 
 --- !u!222 &1192294300
 CanvasRenderer:
   m_ObjectHideFlags: 0
