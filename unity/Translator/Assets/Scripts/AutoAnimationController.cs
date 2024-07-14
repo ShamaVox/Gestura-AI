@@ -107,17 +107,18 @@ public class AutoAnimationController : MonoBehaviour
 
         while (animationQueue.Count > 0)
         {
-            var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            Debug.Log($"{time} - Playing queued animation: {animationQueue.Peek()}");
             string animationName = animationQueue.Dequeue();
             animator.Play(animationName);
 
+            // Wait until the animation state is set
+            yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName(animationName));
+            
+            var animationState = animator.GetCurrentAnimatorStateInfo(0);
+            
             // Wait for the animation to finish
-            yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
-            // yield return new WaitForSeconds(0.01f); // Small buffer between animations
-            time = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            Debug.Log($"{time} - Finished playing queued animation: {animationName}");
-            Debug.Log("Remaining animations: " + string.Join(", ", animationQueue));
+            yield return new WaitForSeconds(animationState.length);
+
+            Debug.Log($"Finished playing animation: {animationName}");
         }
 
         isPlayingAnimation = false;
