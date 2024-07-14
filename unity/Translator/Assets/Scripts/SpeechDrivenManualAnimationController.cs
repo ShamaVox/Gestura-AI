@@ -77,7 +77,8 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
     {
         var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
         Debug.Log($"{time} - Segment updated: {segment.Result}");
-        
+        Debug.Log("Processed words: " + string.Join(", ", processedWords));
+
         // Process the updated segment
         string[] words = segment.Result.Split(new char[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
         foreach (string word in words)
@@ -100,6 +101,17 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
     private void OnFinished(string finalResult)
     {
         Debug.Log("Stream finished!");
+        Debug.Log("Processed words: " + string.Join(", ", processedWords));
         processedWords.Clear(); // Clear processed words when stream finishes
+    }
+
+    private void OnDestroy()
+    {
+        _stream.OnResultUpdated -= OnResult;
+        _stream.OnSegmentFinished -= OnSegmentFinished;
+        _stream.OnStreamFinished -= OnFinished;
+        _stream.OnSegmentUpdated -= OnSegmentUpdated;
+        microphoneRecord.OnRecordStop -= OnRecordStop;
+        recordButton.onClick.RemoveListener(OnRecordButtonPressed);
     }
 }
