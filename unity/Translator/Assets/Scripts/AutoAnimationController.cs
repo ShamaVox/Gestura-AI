@@ -54,6 +54,7 @@ public class AutoAnimationController : MonoBehaviour
     {
         var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
         Debug.Log($"{time} - Processing text: {text}");
+        
         // Convert to lowercase and remove all punctuation
         text = Regex.Replace(text.ToLower(), @"[^\w\s]", "");
 
@@ -61,7 +62,7 @@ public class AutoAnimationController : MonoBehaviour
 
         foreach (var entry in textToAnimationMap)
         {
-            var index = text.IndexOf(entry.Key, StringComparison.Ordinal);
+            var index = text.IndexOf(entry.Key, System.StringComparison.Ordinal);
             if (index != -1)
             {
                 detectedPhrases.Add((index, entry.Key, entry.Value));
@@ -77,15 +78,10 @@ public class AutoAnimationController : MonoBehaviour
 
         foreach (var phrase in detectedPhrases)
         {
-
-            animationQueue.Enqueue(phrase.animations[0]); // Enqueue only the first animation for simplicity
-        }
-
-        if (!isPlayingAnimation)
-        {
-            time = System.DateTime.Now.ToString("HH:mm:ss.fff");
-            Debug.Log($"{time} - Starting animations: {string.Join(", ", detectedPhrases.Select(p => p.animations[0]))}");
-            StartCoroutine(PlayQueuedAnimations());
+            foreach (var animation in phrase.animations)
+            {
+                QueueAnimation(animation);
+            }
         }
     }
 

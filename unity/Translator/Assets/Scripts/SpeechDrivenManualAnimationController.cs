@@ -79,7 +79,10 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
         Debug.Log($"{time} - Segment updated: {segment.Result}");
         Debug.Log("Processed words: " + string.Join(", ", processedWords));
 
-        // Process the updated segment
+        // Process the updated segment using the AutoAnimationController
+        autoAnimationController.ProcessText(segment.Result);
+
+        // Update processedWords
         string[] words = segment.Result.Split(new char[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
         foreach (string word in words)
         {
@@ -87,13 +90,6 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
             if (!processedWords.Contains(lowercaseWord))
             {
                 processedWords.Add(lowercaseWord);
-                if (autoAnimationController.textToAnimationMap.ContainsKey(lowercaseWord))
-                {
-                    foreach (string animation in autoAnimationController.textToAnimationMap[lowercaseWord])
-                    {
-                        autoAnimationController.QueueAnimation(animation);
-                    }
-                }
             }
         }
     }
