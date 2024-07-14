@@ -128,6 +128,7 @@ public class VideoAudioTranscriber : MonoBehaviour
     private void OnSegmentFinished(WhisperResult segment)
     {
         Debug.Log($"Segment finished: {segment.Result}");
+        
     }
 
     private void OnFinished(string finalResult)

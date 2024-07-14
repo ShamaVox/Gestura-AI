@@ -1311,7 +1311,7 @@ MonoBehaviour:
   singleSegment: 1
   enableTokens: 0
   initialPrompt: 
-  stepSec: 2
+  stepSec: 3
   keepSec: 0.1
   lengthSec: 5
   updatePrompt: 1
