@@ -7,6 +7,8 @@ using Whisper.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
+
 
 [RequireComponent(typeof(AudioSource))]
 public class VideoAudioTranscriber : MonoBehaviour
@@ -112,6 +114,8 @@ public class VideoAudioTranscriber : MonoBehaviour
 
     private void OnResult(string result)
     {
+        result = Regex.Replace(result, @"\[BLANK_AUDIO\]", "");
+        result = Regex.Replace(result, @"\[INAUDIBLE\]", "");
         text.text = result;
         //UiUtils.ScrollDown(scroll);
     }

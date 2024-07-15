@@ -35,7 +35,7 @@ public class SpeechDrivenManualAnimationController : MonoBehaviour
         microphoneRecord.OnRecordStop += OnRecordStop;
         recordButton.onClick.AddListener(OnRecordButtonPressed);
 
-        OnRecordButtonPressed();
+        // OnRecordButtonPressed();
     }
 
     private void OnRecordButtonPressed()
