@@ -20,8 +20,7 @@ public class AutoAnimationController : MonoBehaviour
         {"hello", new List<string>{"Hello"}},
         {"hi", new List<string>{"Hello"}},
         {"hey", new List<string>{"Hello"}},
-        {"you are welcome", new List<string>{"YouAreWelcome"}},
-        {"you're welcome", new List<string>{"YouAreWelcome"}},
+        {"welcome", new List<string>{"YouAreWelcome"}},
 
         {"please", new List<string>{"Please"}},
         {"maybe", new List<string>{"Maybe"}},
@@ -35,6 +34,7 @@ public class AutoAnimationController : MonoBehaviour
         {"look", new List<string>{"Look"}},
         {"talk", new List<string>{"Talk"}},
 
+
         {"one", new List<string>{"One"}},
         {"1", new List<string>{"One"}},
         {"two", new List<string>{"Two"}},
@@ -46,44 +46,65 @@ public class AutoAnimationController : MonoBehaviour
         {"five", new List<string>{"Five"}},
         {"5", new List<string>{"Five"}},
         {"six", new List<string>{"Six"}},
-        {"6", new List<string>{"Six"}}
+        {"6", new List<string>{"Six"}},
+
+        
+        {"help", new List<string>{"Help"}},
+        {"new", new List<string>{"New"}},
+        {"virtual", new List<string>{"Virtual"}},
+        {"sign", new List<string>{"Sign"}},
+        {"language", new List<string>{"Language"}},
+        {"assistant", new List<string>{"Assistant"}},
+        
+        {"here", new List<string>{"Here"}},
+        {"i", new List<string>{"I"}},
+        {"i am", new List<string>{"I"}},
+        {"you", new List<string>{"You"}},
+
+        {"your", new List<string>{"Your"}},
+        {"to", new List<string>{"To"}}
     };
     
 
-    public void ProcessText(string text)
+public void ProcessText(string text)
+{
+    var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+    Debug.Log($"{time} - Processing text: {text}");
+
+    // Convert to lowercase and remove all punctuation except spaces
+    text = Regex.Replace(text.ToLower(), @"[^\w\s]", "");
+
+    var detectedPhrases = new List<(int index, string phrase, List<string> animations)>();
+
+    foreach (var entry in textToAnimationMap)
     {
-        var time = System.DateTime.Now.ToString("HH:mm:ss.fff");
-        Debug.Log($"{time} - Processing text: {text}");
-        
-        // Convert to lowercase and remove all punctuation
-        text = Regex.Replace(text.ToLower(), @"[^\w\s]", "");
-
-        var detectedPhrases = new List<(int index, string phrase, List<string> animations)>();
-
-        foreach (var entry in textToAnimationMap)
+        string pattern = $@"\b{Regex.Escape(entry.Key)}\b";
+        var matches = Regex.Matches(text, pattern);
+        foreach (Match match in matches)
         {
-            var index = text.IndexOf(entry.Key, System.StringComparison.Ordinal);
-            if (index != -1)
-            {
-                detectedPhrases.Add((index, entry.Key, entry.Value));
-            }
-        }
-        
-        time = System.DateTime.Now.ToString("HH:mm:ss.fff");
-        Debug.Log($"{time} - Detected phrases: {string.Join(", ", detectedPhrases.Select(p => p.phrase))}");
-
-        if (detectedPhrases.Count == 0) return; // Early exit if no phrases are detected
-
-        detectedPhrases.Sort((a, b) => a.index.CompareTo(b.index)); // Sort by index
-
-        foreach (var phrase in detectedPhrases)
-        {
-            foreach (var animation in phrase.animations)
-            {
-                QueueAnimation(animation);
-            }
+            detectedPhrases.Add((match.Index, entry.Key, entry.Value));
         }
     }
+
+    time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+    Debug.Log($"{time} - Detected phrases: {string.Join(", ", detectedPhrases.Select(p => p.phrase))}");
+
+    if (detectedPhrases.Count == 0) return; // Early exit if no phrases are detected
+
+    detectedPhrases.Sort((a, b) => a.index.CompareTo(b.index)); // Sort by index
+
+    foreach (var phrase in detectedPhrases)
+    {
+        animationQueue.Enqueue(phrase.animations[0]); // Enqueue only the first animation for simplicity
+    }
+
+    if (!isPlayingAnimation)
+    {
+        time = System.DateTime.Now.ToString("HH:mm:ss.fff");
+        Debug.Log($"{time} - Starting animations: {string.Join(", ", detectedPhrases.Select(p => p.animations[0]))}");
+        StartCoroutine(PlayQueuedAnimations());
+    }
+}
 
     public void QueueAnimation(string animationName)
     {
