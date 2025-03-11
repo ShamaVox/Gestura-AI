@@ -1,0 +1,9 @@
+fastdtw
+mediapipe
+numpy
+opencv-contrib-python
+opencv-python
+pandas
+pytube
+tdqm
+h5py
