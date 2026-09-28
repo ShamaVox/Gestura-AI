@@ -18,7 +18,7 @@ from tensorflow.keras.models import load_model
 '''
 
 # Initialize API Key for GPT-4
-openai.api_key = "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"
+openai.api_key = ""
 
 # Load Whisper Speech-to-Text Model
 whisper_model = whisper.load_model("base")
